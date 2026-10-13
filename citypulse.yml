@@ -1,0 +1,32 @@
+name: CityPulse end-to-end simulation
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - 'sql/**'
+      - '.devcontainer/**'
+      - '.github/workflows/citypulse.yml'
+      - 'requirements.txt'
+jobs:
+  run-citypulse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the same environment used by Codespaces
+        run: docker build -f .devcontainer/Dockerfile -t citypulse-env .
+      - name: Run synthetic data, Hadoop Streaming, validation, charts and Hive
+        run: |
+          docker run --name citypulse-run \
+            -v "$PWD:/workspaces/CityPulse-BigData-Project" \
+            -w /workspaces/CityPulse-BigData-Project \
+            citypulse-env bash scripts/run_all.sh
+      - name: Upload simulation results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: citypulse-output
+          path: output/
+          if-no-files-found: warn

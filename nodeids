@@ -1,0 +1,4 @@
+[
+  "tests/test_mapper_reducer.py::test_mapper_emits_three_pollutants",
+  "tests/test_mapper_reducer.py::test_reducer_mean"
+]
